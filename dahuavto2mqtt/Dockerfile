@@ -12,7 +12,7 @@ RUN apk update && \
     apk add --no-cache python3 py3-pip py3-setuptools git && \
     pip3 install --upgrade pip --no-cache-dir paho-mqtt prometheus_client requests
 
-RUN git clone https://gitlab.com/elad.bar/DahuaVTO2MQTT --branch ${DAHUA_BRANCH} --depth 1 /app
+RUN git clone https://gitlab.com/elad.bar/DahuaVTO2MQTT --branch ${DAHUA_BRANCH} /app
 
 COPY run.sh /app/run.sh
 RUN chmod +x /app/run.sh
