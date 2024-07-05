@@ -1,12 +1,11 @@
 ---
 name: MusicServer
-version: 1.0.5
+version: 1.0.6
 slug: musicserver
 description: Snapcast, Librespot and Shairport for Home Assistant
 arch:
 - amd64
 startup: services
-init: false
 boot: auto
 ports:
   1780/tcp: 1780
