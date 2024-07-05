@@ -8,4 +8,5 @@ arch:
 startup: services
 init: false
 boot: auto
-
+ports:
+  1780/tcp: 1780
