@@ -4,8 +4,6 @@ version: 1.0.1
 slug: musicserver
 description: Snapcast, Librespot and Shairport for Home Assistant
 arch:
-- armv7
-- aarch64
 - amd64
 startup: services
 init: false
