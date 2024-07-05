@@ -193,6 +193,7 @@ COPY --from=shairport /nqptp/nqptp /usr/local/bin/
 # Copy local files
 COPY ./s6-rc.d /etc/s6-overlay/s6-rc.d
 RUN chmod +x /etc/s6-overlay/s6-rc.d/01-startup/script.sh
+COPY ./snapserver.conf /etc/snapserver.conf
 
 RUN mkdir -p /var/run/dbus/
 
