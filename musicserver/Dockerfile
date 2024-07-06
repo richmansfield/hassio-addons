@@ -1,5 +1,6 @@
 ARG alpine_version=3.20
 ARG S6_OVERLAY_VERSION=3.2.0.0
+ARG BUILD_FROM=hassio-addons/base:latest
 
 FROM docker.io/alpine:${alpine_version} as builder
 RUN apk add --no-cache \
@@ -165,7 +166,8 @@ RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
 ###### BASE END ######
 
 ###### MAIN START ######
-FROM docker.io/alpine:${alpine_version}
+FROM ${BUILD_FROM}
+### FROM docker.io/alpine:${alpine_version}
 
 ENV S6_CMD_WAIT_FOR_SERVICES=1
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=60
