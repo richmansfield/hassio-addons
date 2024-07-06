@@ -1,6 +1,6 @@
 ---
 name: MusicServer
-version: 1.0.9
+version: 1.0.10
 slug: musicserver
 description: Snapcast, Librespot and Shairport for Home Assistant
 arch:

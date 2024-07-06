@@ -2,7 +2,9 @@ ARG alpine_version=3.20
 ARG S6_OVERLAY_VERSION=3.2.0.0
 ARG BUILD_FROM=hassio-addons/base:latest
 
-FROM docker.io/alpine:${alpine_version} as builder
+FROM ${BUILD_FROM} as builder
+#FROM docker.io/alpine:${alpine_version} as builder
+
 RUN apk add --no-cache \
     # LIBRESPOT
     cargo \
@@ -47,6 +49,7 @@ RUN apk add --no-cache \
 
 ###### LIBRESPOT START ######
 FROM builder AS librespot
+
 # Use faster 'mold' linker and strip debug symbols
 ENV RUSTFLAGS="-C link-args=-fuse-ld=mold -C strip=symbols"
 # Use the new "sparse" protocol which speeds up the cargo index update massively
@@ -144,7 +147,8 @@ RUN mkdir /shairport-libs \
 ###### SHAIRPORT BUNDLE END ######
 
 ###### BASE START ######
-FROM docker.io/alpine:${alpine_version} as base
+#FROM docker.io/alpine:${alpine_version} as base
+FROM ${BUILD_FROM} as base
 ARG S6_OVERLAY_VERSION
 RUN apk add --no-cache \
     avahi \
