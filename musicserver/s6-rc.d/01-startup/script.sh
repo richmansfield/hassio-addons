@@ -1,3 +1,4 @@
-#!/usr/bin/env bashio
-bashio::log.info "--------------------------"
-bashio::log.info "Starting Music Server"
+#!/bin/sh
+echo "--------------------------"
+echo $(date)
+echo "Starting Music Server"

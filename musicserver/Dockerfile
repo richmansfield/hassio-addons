@@ -1,9 +1,9 @@
 ARG alpine_version=3.20
 ARG S6_OVERLAY_VERSION=3.2.0.0
-ARG BUILD_FROM=hassio-addons/base:latest
+ARG BUILD_FROM
+#ARG BUILD_FROM=ghcr.io/hassio-addons/base:latest
 
 FROM ${BUILD_FROM} as builder
-#FROM docker.io/alpine:${alpine_version} as builder
 
 RUN apk add --no-cache \
     # LIBRESPOT
@@ -146,49 +146,58 @@ RUN mkdir /shairport-libs \
 ### SPS END ###
 ###### SHAIRPORT BUNDLE END ######
 
-###### BASE START ######
-#FROM docker.io/alpine:${alpine_version} as base
-FROM ${BUILD_FROM} as base
-ARG S6_OVERLAY_VERSION
-RUN apk add --no-cache \
-    avahi \
-    dbus \
-    fdupes
-# Copy all necessary libaries into one directory to avoid carring over duplicates
-# Removes all libaries that will be installed in the final image
-COPY --from=librespot /librespot-libs/ /tmp-libs/
-COPY --from=snapcast /snapserver-libs/ /tmp-libs/
-COPY --from=shairport /shairport-libs/ /tmp-libs/
-RUN fdupes -d -N /tmp-libs/ /usr/lib/
+# ###### BASE START ######
+# FROM ${BUILD_FROM} as base
+# # ARG S6_OVERLAY_VERSION
+# RUN apk add --no-cache \
+#     avahi \
+#     dbus \
+#     fdupes
+# # Copy all necessary libaries into one directory to avoid carring over duplicates
+# # Removes all libaries that will be installed in the final image
+# COPY --from=librespot /librespot-libs/ /tmp-libs/
+# COPY --from=snapcast /snapserver-libs/ /tmp-libs/
+# COPY --from=shairport /shairport-libs/ /tmp-libs/
+# RUN fdupes -d -N /tmp-libs/ /usr/lib/
 
 # Install s6
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/
-RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp/
-RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz    
+# ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/
+# RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
+# ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp/
+# RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz    
 
 ###### BASE END ######
 
+
+
+
 ###### MAIN START ######
 FROM ${BUILD_FROM}
-### FROM docker.io/alpine:${alpine_version}
 
-ENV S6_CMD_WAIT_FOR_SERVICES=1
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=60
+# ENV S6_CMD_WAIT_FOR_SERVICES=1
+# ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
 RUN apk add --no-cache \
             avahi \
-            dbus \
     && rm -rf /lib/apk/db/*
 
 # Copy extracted s6-overlay and libs from base
-COPY --from=base /command /command/
-COPY --from=base /package/ /package/
-COPY --from=base /etc/s6-overlay/ /etc/s6-overlay/
-COPY --from=base init /init
-COPY --from=base /tmp-libs/ /usr/lib/
+# COPY --from=base /command /command/
+# COPY --from=base /package/ /package/
+# COPY --from=base /etc/s6-overlay/ /etc/s6-overlay/
+# COPY --from=base init /init
+
+# Disable dbus
+RUN sed -i \
+        -e 's/.*enable-reflector=.*/enable-reflector=yes/' \
+        -e 's/.*enable-dbus=.*/enable-dbus=no/' \
+        /etc/avahi/avahi-daemon.conf
 
 # Copy all necessary files from the builders
+COPY --from=librespot /librespot-libs/ /usr/lib/
+COPY --from=snapcast /snapserver-libs/ /usr/lib/
+COPY --from=shairport /shairport-libs/ /usr/lib/
+
 COPY --from=librespot /librespot/target/release/librespot /usr/local/bin/
 COPY --from=snapcast /snapcast/bin/snapserver /usr/local/bin/
 COPY --from=snapcast /snapweb/dist /usr/share/snapserver/snapweb
@@ -201,7 +210,7 @@ RUN chmod +x /etc/s6-overlay/s6-rc.d/01-startup/script.sh
 
 COPY ./snapserver.conf /etc/snapserver.conf
 
-RUN mkdir -p /var/run/dbus/
+# RUN mkdir -p /var/run/dbus/
 
 ENTRYPOINT ["/init"]
 ###### MAIN END ######
